@@ -10,12 +10,12 @@ import (
 )
 
 type (
-	Cursor = *astutil.Cursor
+	Cursor = astutil.Cursor
 	// Matched
 	// If pre-ordered, the callback can return bool to control whether to continue traversing the subtree,
 	// But if pre-ordered, it may miss the case where the modified subtree satisfies the pattern.
 	// Postorder also has type problems, and may need to be handled with a working-list
-	Matched func(Cursor, *MatchCtx)
+	Matched func(*Cursor, *MatchCtx)
 	Matcher struct {
 		*matchFuns
 		MatchCallEllipsis bool
@@ -47,7 +47,7 @@ func (m *Matcher) Matched(inPkg *Package, pattern, rootNode ast.Node) (matched b
 			panic(r)
 		}
 	}()
-	m.Match(inPkg, pattern, rootNode, func(Cursor, *MatchCtx) {
+	m.Match(inPkg, pattern, rootNode, func(*Cursor, *MatchCtx) {
 		matched = true
 		panic(abort)
 	})
