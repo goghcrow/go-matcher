@@ -31,7 +31,8 @@ func (m *Matcher) Match(inPkg *Package, pattern, node ast.Node, f Matched) {
 	buildStack := m.mkStackBuilder(node)
 	postOrder(node, func(c *astutil.Cursor) bool {
 		n := c.Node()
-		mctx := newMCtx(m, inPkg, buildStack(n))
+		stack, names := buildStack(n)
+		mctx := newMCtx(m, inPkg, stack, names)
 		if m.match(pattern, n, mctx) {
 			f(c, mctx)
 		}
@@ -54,22 +55,27 @@ func (m *Matcher) Matched(inPkg *Package, pattern, rootNode ast.Node) (matched b
 	return matched
 }
 
-type stackBuilder func(node ast.Node) []ast.Node
+type stackBuilder func(node ast.Node) ([]ast.Node, []string)
 
 func (m *Matcher) mkStackBuilder(root ast.Node) stackBuilder {
-	parents := map[ast.Node]ast.Node{}
+	type node struct {
+		node  ast.Node
+		field string
+	}
+	parents := map[ast.Node]node{}
 	postOrder(root, func(c *astutil.Cursor) bool {
-		parents[c.Node()] = c.Parent()
+		parents[c.Node()] = node{c.Parent(), c.Name()}
 		return true
 	})
 
-	return func(node ast.Node) []ast.Node {
-		var stack []ast.Node
+	return func(node ast.Node) (stack []ast.Node, names []string) {
 		for node != nil {
 			stack = append(stack, node)
-			node = parents[node]
+			parent := parents[node]
+			node = parent.node
+			names = append(names, parent.field)
 		}
-		return stack
+		return stack, names
 	}
 }
 

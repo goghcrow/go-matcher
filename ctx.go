@@ -17,13 +17,14 @@ type (
 	MatchCtx struct {
 		Pkg     *Package
 		Stack   []ast.Node
+		Names   []string // stack parent fileld name
 		Binds   Binds
 		Matcher *Matcher
 	}
 	MatchFun func(n ast.Node, ctx *MatchCtx) bool
 )
 
-func newMCtx(m *Matcher, pkg *Package, stack []ast.Node) *MatchCtx {
+func newMCtx(m *Matcher, pkg *Package, stack []ast.Node, names []string) *MatchCtx {
 	return &MatchCtx{
 		Matcher: m,
 		Pkg:     pkg,
