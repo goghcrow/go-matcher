@@ -29,6 +29,7 @@ func newMCtx(m *Matcher, pkg *Package, stack []ast.Node, names []string) *MatchC
 		Matcher: m,
 		Pkg:     pkg,
 		Stack:   stack,
+		Names:   names,
 		Binds:   map[PatternVar]ast.Node{},
 	}
 }
