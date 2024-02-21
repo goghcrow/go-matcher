@@ -9,6 +9,12 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
+// WildcardIdent
+// typed nil ast.Ident means wildcard ident
+// e.g. x, y := ...
+// &ast.AssignStmt{ Lhs: []ast.Expr{ WildcardIdent, WildcardIdent }, },
+var WildcardIdent *ast.Ident
+
 type (
 	Cursor = astutil.Cursor
 	// Matched
@@ -709,6 +715,10 @@ func (m *Matcher) matchBasicLit(x, y *ast.BasicLit, ctx *MatchCtx) bool {
 }
 
 func (m *Matcher) matchToken(x, y token.Token, ctx *MatchCtx) bool {
+	// ast.RangeStmt.Tok is ILLEGAL if Key == nil
+	// so, token.ILLEGAL can't be wildcard
+	// isWildcard := x == token.ILLEGAL
+	// if isWildcard { return true }
 	if matchFun := m.tryGetTokenMatchFun(x); matchFun != nil {
 		return matchFun(TokenNode(y), ctx)
 	}
