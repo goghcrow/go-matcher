@@ -11,6 +11,7 @@ import (
 type (
 	Package    = packages.Package
 	PatternVar = string
+	FuncNode   = ast.Node // *ast.FuncLit | *ast.FuncDecl
 	Binds      map[PatternVar]ast.Node
 
 	MatchCtx struct {
@@ -51,4 +52,16 @@ func (c *MatchCtx) ShowNode(n ast.Node) string {
 		return ShowNode(fset, n)
 	}
 	return ShowNode(fset, n) + "\nat " + fset.Position(n.Pos()).String()
+}
+
+func (c *MatchCtx) EnclosingFunc() FuncNode {
+	for _, it := range c.Stack {
+		switch n := it.(type) {
+		case *ast.FuncLit, *ast.FuncDecl:
+			return n
+		default:
+			continue
+		}
+	}
+	return nil
 }
